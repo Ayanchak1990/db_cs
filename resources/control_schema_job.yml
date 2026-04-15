@@ -1,0 +1,26 @@
+resources:
+  jobs:
+    control_schema_setup:
+      name: "[${var.ENV}] Deltek - Control Schema Setup"
+      description: "Creates all control metadata tables for the Deltek ingestion framework"
+
+      tasks:
+        - task_key: run_control_schema_ddl
+          description: "Execute all control schema DDL scripts in order"
+          spark_python_task:
+            python_file: ../src/control_schema/run_ddl.py
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--control_schema"
+              - "${var.control_schema}"
+          new_cluster:
+            spark_version: 16.4.x-scala2.12
+            node_type_id: Standard_D3_v2
+            num_workers: 1
+            data_security_mode: SINGLE_USER
+
+      tags:
+        project: deltek_control_schema
+        layer: control
+        env: ${var.ENV}

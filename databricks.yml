@@ -1,0 +1,44 @@
+bundle:
+  name: deltek_control_schema
+
+include:
+  - resources/*.yml
+
+variables:
+  ENV:
+    default: dev
+  catalog:
+    description: Unity Catalog name for this environment
+  control_schema:
+    description: Schema name for control/metadata tables
+    default: deltek_cdm
+  raw_schema:
+    description: Schema name for raw layer tables
+    default: raw
+  silver_schema:
+    description: Schema name for silver layer tables
+    default: silver
+  gold_schema:
+    description: Schema name for gold layer tables
+    default: gold
+  secret_scope:
+    default: ""
+
+targets:
+
+  dev:
+    mode: development
+    default: true
+    presets:
+      tags:
+        environment: dev
+        project: deltek_control_schema
+    workspace:
+      host: https://adb-465912991099197.17.azuredatabricks.net
+      root_path: ~/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      ENV: dev
+      catalog: dev
+      control_schema: deltek_cdm
+      secret_scope: ""
