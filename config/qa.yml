@@ -1,0 +1,14 @@
+# QA environment variable overrides for the deltek_control_schema bundle.
+# Reference: databricks bundle deploy -t qa
+# Requires: service_principal_name in databricks.yml qa target must be filled in before deploying.
+
+variables:
+  catalog: qa
+  control_schema: deltek_cdm
+  environment: qa
+  raw_schema: raw
+  silver_schema: silver
+  gold_schema: gold
+  spark_version: 16.4.x-scala2.12
+  node_type_id: Standard_D3_v2
+  secret_scope: deltek_control_schema_qa

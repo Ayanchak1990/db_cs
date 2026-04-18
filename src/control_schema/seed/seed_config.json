@@ -1,0 +1,226 @@
+{
+  "source_object_config": [
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "source_system": "sql_server",
+      "source_schema": "dbo",
+      "source_object": "v_ESA_TalentBridge_Employee",
+      "target_schema": "raw",
+      "target_table": "deltek_employee",
+      "staging_table": "staging.deltek_employee",
+      "load_type": "hash_incremental",
+      "write_mode": "merge",
+      "primary_key": "employee_id",
+      "watermark_column": null,
+      "hash_columns": null,
+      "active_flag": true,
+      "load_order": 1,
+      "created_by": "system",
+      "updated_by": "system"
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "source_system": "sql_server",
+      "source_schema": "dbo",
+      "source_object": "msgraph_employee",
+      "target_schema": "raw",
+      "target_table": "msgraph_employee",
+      "staging_table": "staging.msgraph_employee",
+      "load_type": "hash_incremental",
+      "write_mode": "merge",
+      "primary_key": "employee_id",
+      "watermark_column": null,
+      "hash_columns": null,
+      "active_flag": true,
+      "load_order": 2,
+      "created_by": "system",
+      "updated_by": "system"
+    }
+  ],
+  "pipeline_config": [
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "max_retry",
+      "config_value": "3",
+      "description": "Maximum retry attempts per object",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "retry_delay_seconds",
+      "config_value": "300",
+      "description": "Seconds to wait between retry attempts",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "batch_size",
+      "config_value": "100000",
+      "description": "Rows per batch during extraction",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "max_parallel_objects",
+      "config_value": "4",
+      "description": "Max objects to ingest in parallel",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "schema_drift_action",
+      "config_value": "EVOLVE",
+      "description": "Action on schema drift: EVOLVE or HALT",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "dq_failure_action",
+      "config_value": "HALT",
+      "description": "Action on DQ ERROR failure: HALT or WARN",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "alert_on_failure",
+      "config_value": "true",
+      "description": "Send email alert on pipeline failure",
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "config_key": "alert_email",
+      "config_value": "placeholder@email.com",
+      "description": "Email address for failure alerts",
+      "active_flag": true
+    }
+  ],
+  "metadata_column_config": [
+    {
+      "pipeline_id": "default",
+      "column_name": "record_hash",
+      "data_type": "STRING",
+      "applies_to": "hash_incremental",
+      "computation": "sha2(concat_ws('|', hash_columns), 256)",
+      "column_order": 1,
+      "is_merge_key": false,
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "default",
+      "column_name": "ingestion_timestamp",
+      "data_type": "TIMESTAMP",
+      "applies_to": "all",
+      "computation": "current_timestamp()",
+      "column_order": 2,
+      "is_merge_key": false,
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "default",
+      "column_name": "load_run_id",
+      "data_type": "STRING",
+      "applies_to": "all",
+      "computation": "load_run_id",
+      "column_order": 3,
+      "is_merge_key": false,
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "default",
+      "column_name": "source_system",
+      "data_type": "STRING",
+      "applies_to": "all",
+      "computation": "source_system",
+      "column_order": 4,
+      "is_merge_key": false,
+      "active_flag": true
+    },
+    {
+      "pipeline_id": "default",
+      "column_name": "source_object",
+      "data_type": "STRING",
+      "applies_to": "all",
+      "computation": "source_object",
+      "column_order": 5,
+      "is_merge_key": false,
+      "active_flag": true
+    }
+  ],
+  "connection_config": [
+    {
+      "pipeline_id": "raw_employee_pipeline",
+      "source_system": "sql_server",
+      "connection_name": "deltek_sqlserver_dev",
+      "secret_scope": "deltek_raw_ingestion_dev",
+      "jdbc_url_secret_key": "sql_server_jdbc_url",
+      "jdbc_user_secret_key": "sql_server_username",
+      "jdbc_password_secret_key": "sql_server_password",
+      "driver_class": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+      "extra_jdbc_options": null,
+      "active_flag": true
+    }
+  ],
+  "dq_rule_config": [
+    {
+      "rule_id": "raw_emp_deltek_employee_id_not_null",
+      "pipeline_id": "raw_employee_pipeline",
+      "source_object": "v_ESA_TalentBridge_Employee",
+      "rule_name": "employee_id_not_null",
+      "rule_type": "NOT_NULL",
+      "column_name": "employee_id",
+      "rule_expression": "employee_id IS NOT NULL",
+      "expected_value": null,
+      "severity": "ERROR",
+      "active_flag": true
+    },
+    {
+      "rule_id": "raw_emp_deltek_employee_id_unique",
+      "pipeline_id": "raw_employee_pipeline",
+      "source_object": "v_ESA_TalentBridge_Employee",
+      "rule_name": "employee_id_unique",
+      "rule_type": "UNIQUE",
+      "column_name": "employee_id",
+      "rule_expression": "COUNT(employee_id) = COUNT(DISTINCT employee_id)",
+      "expected_value": null,
+      "severity": "ERROR",
+      "active_flag": true
+    },
+    {
+      "rule_id": "raw_emp_deltek_min_row_count",
+      "pipeline_id": "raw_employee_pipeline",
+      "source_object": "v_ESA_TalentBridge_Employee",
+      "rule_name": "min_row_count",
+      "rule_type": "ROW_COUNT",
+      "column_name": null,
+      "rule_expression": "COUNT(*) > 0",
+      "expected_value": "1",
+      "severity": "ERROR",
+      "active_flag": true
+    },
+    {
+      "rule_id": "raw_emp_msgraph_employee_id_not_null",
+      "pipeline_id": "raw_employee_pipeline",
+      "source_object": "msgraph_employee",
+      "rule_name": "employee_id_not_null",
+      "rule_type": "NOT_NULL",
+      "column_name": "employee_id",
+      "rule_expression": "employee_id IS NOT NULL",
+      "expected_value": null,
+      "severity": "ERROR",
+      "active_flag": true
+    },
+    {
+      "rule_id": "raw_emp_msgraph_email_not_null",
+      "pipeline_id": "raw_employee_pipeline",
+      "source_object": "msgraph_employee",
+      "rule_name": "email_not_null",
+      "rule_type": "NOT_NULL",
+      "column_name": "email",
+      "rule_expression": "email IS NOT NULL",
+      "expected_value": null,
+      "severity": "WARN",
+      "active_flag": true
+    }
+  ]
+}
