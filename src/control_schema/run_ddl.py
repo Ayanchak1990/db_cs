@@ -1,11 +1,20 @@
+import sys
+# Remove conflicting importlib paths
+sys.modules.pop("importlib.metadata", None)
+sys.modules.pop("importlib.metadata.diagnose", None)
+
 import argparse
 import logging
 import os
 import re
 import sys
 import traceback
+import inspect
 
 from pyspark.sql import SparkSession
+
+
+_MIN_EXPECTED_SQL_FILES = 15
 
 logger = logging.getLogger("run_ddl")
 if not logger.handlers:
@@ -51,10 +60,26 @@ def run_ddl(catalog: str, control_schema: str) -> int:
 
     spark = SparkSession.builder.getOrCreate()
 
-    sql_dir = os.path.dirname(os.path.abspath(__file__))
+    try:
+        sql_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ddl")
+    except NameError:
+        sql_dir = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))), "ddl")
+
     sql_files = sorted([
         f for f in os.listdir(sql_dir) if f.endswith(".sql")
     ])
+
+    if not sql_files:
+        raise RuntimeError(
+            f"No .sql files found in sql_dir='{sql_dir}'. "
+            "Ensure DDL scripts are present before running this job."
+        )
+
+    if len(sql_files) < _MIN_EXPECTED_SQL_FILES:
+        logger.warning(
+            f"Expected at least {_MIN_EXPECTED_SQL_FILES} SQL file(s) but found {len(sql_files)} "
+            f"in sql_dir='{sql_dir}' | files={sql_files}"
+        )
 
     logger.info(f"Starting DDL execution | catalog={catalog} | schema={control_schema}")
     logger.info(f"Found {len(sql_files)} SQL file(s): {sql_files}")
@@ -93,4 +118,5 @@ if __name__ == "__main__":
     parser.add_argument("--control_schema", required=True, help="Control schema name")
     args = parser.parse_args()
     failures = run_ddl(args.catalog, args.control_schema)
-    sys.exit(1 if failures > 0 else 0)
+    if failures > 0:
+        raise SystemError(f"{failures} DDL statement(s) failed. Check logs above.")

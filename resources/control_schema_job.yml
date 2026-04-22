@@ -1,7 +1,7 @@
 resources:
   jobs:
     control_schema_setup:
-      name: "[${var.ENV}] Deltek - Control Schema Setup"
+      name: "[${var.ENV}] dcs Setup"
       description: "Creates all control metadata tables for the Deltek ingestion framework"
 
       tasks:
@@ -14,11 +14,31 @@ resources:
               - "${var.catalog}"
               - "--control_schema"
               - "${var.control_schema}"
-          new_cluster:
-            spark_version: 16.4.x-scala2.12
-            node_type_id: Standard_D3_v2
-            num_workers: 1
-            data_security_mode: SINGLE_USER
+          environment_key: serverless
+
+        - task_key: seed_control_schema
+          description: "Seed 5 config tables with initial pipeline configuration"
+          depends_on:
+            - task_key: run_control_schema_ddl
+          spark_python_task:
+            python_file: ../src/control_schema/seed/seed_source_object_config.py
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--control_schema"
+              - "${var.control_schema}"
+              - "--environment"
+              - "${var.ENV}"
+              - "--config_path"
+              - "/Workspace/Users/ayan.chakraborty@eucloid.com/.bundle/dcs/dev/files/src/control_schema/seed/seed_config.json"
+          environment_key: serverless
+
+      environments:
+        - environment_key: serverless
+          spec:
+            client: "1"
+            dependencies:
+              - setuptools
 
       tags:
         project: deltek_control_schema

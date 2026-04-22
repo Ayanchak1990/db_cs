@@ -9,3 +9,4 @@ build/
 .env.*
 *.whl
 context/
+proj_details.md

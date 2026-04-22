@@ -354,13 +354,13 @@ def main() -> None:
         _validate_identifier(args.environment,    "environment")
     except ValueError as exc:
         logger.error(str(exc))
-        sys.exit(1)
+        raise SystemError("Seed failed. Check logs above.")
 
     try:
         config = _load_seed_config(args.config_path)
     except (FileNotFoundError, ValueError) as exc:
         logger.error(f"Failed to load seed config: {exc}")
-        sys.exit(1)
+        raise SystemError("Seed failed. Check logs above.")
 
     spark = SparkSession.builder.getOrCreate()
 
@@ -386,10 +386,10 @@ def main() -> None:
 
     if total_failures > 0:
         logger.error(f"Seed completed with {total_failures} failure(s). Review errors above.")
-        sys.exit(1)
+        raise SystemError("Seed failed. Check logs above.")
 
     logger.info("Seed completed successfully.")
-    sys.exit(0)
+    
 
 
 if __name__ == "__main__":

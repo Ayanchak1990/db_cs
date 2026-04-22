@@ -1,5 +1,5 @@
 bundle:
-  name: deltek_control_schema
+  name: dcs
 
 include:
   - resources/*.yml
@@ -34,11 +34,10 @@ targets:
         environment: dev
         project: deltek_control_schema
     workspace:
-      host: https://adb-465912991099197.17.azuredatabricks.net
+      host: https://dbc-6e076fbc-a34a.cloud.databricks.com/
       root_path: ~/.bundle/${bundle.name}/${bundle.target}
-
     variables:
-      ENV: dev
-      catalog: dev
-      control_schema: deltek_cdm
+      ENV: test
+      catalog: db_certification
+      control_schema: test_schema
       secret_scope: ""
