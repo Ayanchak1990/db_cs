@@ -41,3 +41,17 @@ targets:
       catalog: db_certification
       control_schema: test_schema
       secret_scope: ""
+
+  qa:
+    mode: production
+    variables:
+      catalog: db_certification_qa
+      control_schema: dcs_schema_qa
+      environment: qa
+
+  prod:
+    mode: production
+    variables:
+      catalog: db_certification_prod
+      control_schema: dcs_schema_prod
+      environment: prod

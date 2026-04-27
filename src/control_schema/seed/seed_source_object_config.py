@@ -20,7 +20,9 @@ Runtime-injected values (not in JSON):
   - connection_id    → UUID generated at insert time (connection_config)
   - created_at       → current_timestamp() at insert time
   - updated_at       → current_timestamp() at insert time (where applicable)
-
+  - triggered_by     → Who triggered the run
+  - triggered_mode   → Manual or automated trigger
+  
 Exits with code 0 if all rows were either inserted or already present.
 Exits with code 1 if any insert failed.
 """
